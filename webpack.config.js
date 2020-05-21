@@ -20,7 +20,7 @@ if (!env) {
 
 temp.forEach(item => {
   plugins.push(new HtmlWebpackPlugin({
-    filename: path.resolve(__dirname, `${dest}/views/${item.name}.html`),
+    filename: path.resolve(__dirname, `${dest}/views/${item.name.split("/").join(".")}.html`),
     template: path.resolve(__dirname, `src/views/${item.name}.html`),
     minify: false,
     inject: 'body', //脚本在body后面引入
@@ -67,11 +67,21 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: [env ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader']
+        use: [{
+          loader: MiniCssExtractPlugin.loader,
+          options: {
+            publicPath: "../"
+          }
+        }, 'css-loader']
       },
       {
         test: /\.less$/,
-        use: [env ? 'style-loader' : MiniCssExtractPlugin.loader, 'css-loader', 'less-loader']
+        use: [{
+          loader: MiniCssExtractPlugin.loader,
+          options: {
+            publicPath: "../"
+          }
+        }, 'css-loader', 'less-loader']
       },
       {
         test: /\.(eot|woff2?|ttf|svg)$/,
@@ -92,10 +102,10 @@ module.exports = {
         use: [{
           loader: "url-loader",
           options: {
-            name: "[name].[hash:5].[ext]",
             limit: 1024,
-            publicPath: "../img",
-            outputPath: "img"
+            esModule: false,
+            name: 'img/[name]-[hash:6].[ext]',
+            publicPath: "../"
           }
         }]
       },
@@ -117,12 +127,12 @@ module.exports = {
       },
       {
         from: "./src/public",
-        to: "public",
+        to: "",
         ignore: ["*.md"]
       }
     ]),
     new MiniCssExtractPlugin({  // 分离css
-      filename: "style/[name].[hash:5].min.css",
+      moduleFilename: ({ name }) => `style/${name.split("/").join(".")}.[hash:5].min.css`
     })
   ],
   devServer: {
